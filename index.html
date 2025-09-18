@@ -1,0 +1,1115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HLH/MAS Clinical Decision Support Tool</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            color: #2c3e50;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        
+        .header p {
+            color: #7f8c8d;
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+        }
+        
+        .citation {
+            background: #e8f4f8;
+            border-left: 4px solid #3498db;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            color: #2c3e50;
+        }
+        
+        .nav-tabs {
+            display: flex;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            padding: 5px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            flex-wrap: wrap;
+        }
+        
+        .nav-tab {
+            flex: 1;
+            padding: 15px 20px;
+            text-align: center;
+            background: transparent;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            color: #7f8c8d;
+            min-width: 120px;
+        }
+        
+        .nav-tab.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        .tab-content {
+            display: none;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .diagnostic-section {
+            margin-bottom: 30px;
+            padding: 25px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            border: 1px solid #e9ecef;
+        }
+        
+        .section-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #3498db;
+        }
+        
+        .criteria-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .criteria-item {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            border-left: 4px solid #3498db;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            transition: transform 0.3s ease;
+        }
+        
+        .criteria-item:hover {
+            transform: translateY(-3px);
+        }
+        
+        .criteria-item h4 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        
+        .checkbox-group {
+            margin: 15px 0;
+        }
+        
+        .checkbox-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 10px;
+            padding: 8px;
+            border-radius: 8px;
+            transition: background-color 0.2s ease;
+        }
+        
+        .checkbox-item:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .checkbox-item input[type="checkbox"] {
+            margin-right: 10px;
+            margin-top: 3px;
+            transform: scale(1.2);
+        }
+        
+        .checkbox-item label {
+            font-size: 0.95rem;
+            line-height: 1.4;
+            cursor: pointer;
+        }
+        
+        .result-box {
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 20px;
+            font-weight: 600;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .positive {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+        }
+        
+        .negative {
+            background: linear-gradient(135deg, #27ae60, #229954);
+            color: white;
+        }
+        
+        .treatment-algorithm {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        }
+        
+        .severity-buttons {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+        
+        .severity-btn {
+            padding: 12px 24px;
+            border: 2px solid #3498db;
+            background: white;
+            color: #3498db;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+        
+        .severity-btn.active {
+            background: #3498db;
+            color: white;
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+        }
+        
+        .treatment-recommendation {
+            background: #e8f4f8;
+            padding: 20px;
+            border-radius: 12px;
+            border-left: 4px solid #3498db;
+            margin-top: 20px;
+        }
+        
+        .medication-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .medication-item {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #ddd;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+        }
+        
+        .medication-item h5 {
+            color: #2c3e50;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        
+        .monitoring-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .monitoring-card {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            border-top: 4px solid #3498db;
+        }
+        
+        .alert {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 4px solid #f39c12;
+            background: #fef5e7;
+            color: #8a6d3b;
+        }
+        
+        .warning {
+            background: #fdf2e9;
+            border-left-color: #e67e22;
+        }
+        
+        .info {
+            background: #e8f4f8;
+            border-left-color: #3498db;
+            color: #2c3e50;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin: 5px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+        
+        .reference-list {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 30px;
+        }
+        
+        .reference-list h4 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+        
+        .reference-list ol {
+            padding-left: 20px;
+        }
+        
+        .reference-list li {
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .nav-tabs {
+                flex-direction: column;
+            }
+            
+            .nav-tab {
+                margin-bottom: 5px;
+            }
+            
+            .criteria-grid, .monitoring-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .severity-buttons {
+                flex-direction: column;
+            }
+        }
+        
+        .score-display {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+            margin: 10px 0;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>HLH/MAS Clinical Decision Support Tool</h1>
+            <p>Evidence-Based Diagnostic and Treatment Guidelines for Hemophagocytic Lymphohistiocytosis and Macrophage Activation Syndrome</p>
+            <div class="citation">
+                <strong>Based on:</strong> Henderson LA, et al. "An Evidence-Based Guideline Improves Outcomes for Patients with Hemophagocytic Lymphohistiocytosis and Macrophage Activation Syndrome." 
+                <em>Pediatric Rheumatology</em> (2022). Boston Children's Hospital Evidence-Based Guidelines.
+            </div>
+        </div>
+        
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="showTab('screening')">Screening & Recognition</button>
+            <button class="nav-tab" onclick="showTab('diagnosis')">Diagnostic Criteria</button>
+            <button class="nav-tab" onclick="showTab('treatment')">Treatment Algorithm</button>
+            <button class="nav-tab" onclick="showTab('monitoring')">Monitoring & QI Metrics</button>
+            <button class="nav-tab" onclick="showTab('references')">Resources & References</button>
+        </div>
+        
+        <div id="screening" class="tab-content active">
+            <div class="alert info">
+                <strong>Entry Criteria for HLH/MAS Evaluation:</strong>
+                Consider HLH/MAS in any hospitalized patient with fever ≥38.2°C (101°F) AND ferritin ≥500 ng/mL
+            </div>
+            
+            <div class="diagnostic-section">
+                <h3 class="section-title">Clinical Recognition Checklist</h3>
+                <div class="criteria-grid">
+                    <div class="criteria-item">
+                        <h4>🌡️ Core Clinical Features</h4>
+                        <div class="checkbox-group" id="clinical-features">
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="fever" onchange="updateScreening()">
+                                <label for="fever">Persistent fever ≥38.2°C</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="organomegaly" onchange="updateScreening()">
+                                <label for="organomegaly">Hepatosplenomegaly</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="rash" onchange="updateScreening()">
+                                <label for="rash">Rash</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="neurologic" onchange="updateScreening()">
+                                <label for="neurologic">Neurologic involvement</label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="criteria-item">
+                        <h4>🩸 Laboratory Findings</h4>
+                        <div class="checkbox-group">
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="ferritin-high" onchange="updateScreening()">
+                                <label for="ferritin-high">Ferritin ≥500 ng/mL</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="cytopenias" onchange="updateScreening()">
+                                <label for="cytopenias">Cytopenias (≥2 cell lines)</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="elevated-alt" onchange="updateScreening()">
+                                <label for="elevated-alt">Elevated ALT</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="coagulopathy" onchange="updateScreening()">
+                                <label for="coagulopathy">Coagulopathy</label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="criteria-item">
+                        <h4>🎯 Triggering Conditions</h4>
+                        <div class="checkbox-group">
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="infection" onchange="updateScreening()">
+                                <label for="infection">Active infection (~80% of cases)</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="sjia" onchange="updateScreening()">
+                                <label for="sjia">Systemic JIA or rheumatologic condition</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="malignancy" onchange="updateScreening()">
+                                <label for="malignancy">Malignancy (consider in ~12% of pediatric cases)</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="immunodeficiency" onchange="updateScreening()">
+                                <label for="immunodeficiency">Primary immunodeficiency</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="screening-result" class="result-box negative" style="display: none;">
+                    <div id="screening-text"></div>
+                </div>
+                
+                <div class="alert warning">
+                    <strong>Action:</strong> If screening suggests HLH/MAS, consult <strong>Rheumatology</strong> as the coordinating service for diagnostic evaluation and initial management.
+                </div>
+            </div>
+        </div>
+        
+        <div id="diagnosis" class="tab-content">
+            <div class="diagnostic-section">
+                <h3 class="section-title">HLH 2004 Diagnostic Criteria</h3>
+                <p style="margin-bottom: 20px;"><strong>Requires 5 of 8 criteria OR pathogenic FHL mutation:</strong></p>
+                
+                <div class="criteria-grid">
+                    <div class="criteria-item">
+                        <div class="checkbox-group" id="hlh-criteria">
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="hlh-fever" onchange="calculateHLH()">
+                                <label for="hlh-fever">Fever ≥38.5°C</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="hlh-splenomegaly" onchange="calculateHLH()">
+                                <label for="hlh-splenomegaly">Splenomegaly</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="hlh-cytopenias" onchange="calculateHLH()">
+                                <label for="hlh-cytopenias">Cytopenias ≥2 lineages:<br>
+                                • Hgb <9 g/dL<br>• Platelets <100×10³/μL<br>• Neutrophils <1×10³/μL</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="hlh-triglycerides" onchange="calculateHLH()">
+                                <label for="hlh-triglycerides">Hypertriglyceridemia (≥265 mg/dL) and/or hypofibrinogenemia (≤150 mg/dL)</label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="criteria-item">
+                        <div class="checkbox-group">
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="hlh-hemophagocytosis" onchange="calculateHLH()">
+                                <label for="hlh-hemophagocytosis">Hemophagocytosis in bone marrow, spleen, or lymph nodes</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="hlh-nk-activity" onchange="calculateHLH()">
+                                <label for="hlh-nk-activity">Low or absent NK cell activity</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="hlh-ferritin" onchange="calculateHLH()">
+                                <label for="hlh-ferritin">Ferritin ≥500 ng/mL</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="hlh-sil2r" onchange="calculateHLH()">
+                                <label for="hlh-sil2r">Elevated sIL2R (CD25)</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="score-display">
+                    HLH 2004 Score: <span id="hlh-score">0</span>/8
+                </div>
+                <div id="hlh-result" class="result-box negative">
+                    <div id="hlh-text">Does not meet HLH 2004 criteria</div>
+                </div>
+            </div>
+            
+            <div class="diagnostic-section">
+                <h3 class="section-title">2016 MAS Classification Criteria for sJIA</h3>
+                <p style="margin-bottom: 20px;"><strong>Requires febrile patient with known/suspected sJIA PLUS:</strong></p>
+                
+                <div class="criteria-grid">
+                    <div class="criteria-item">
+                        <h4>Required (Must Have)</h4>
+                        <div class="checkbox-group">
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="mas-ferritin" onchange="calculateMAS()">
+                                <label for="mas-ferritin">Ferritin ≥684 ng/mL</label>
+                            </div>
+                        </div>
+                        
+                        <h4 style="margin-top: 20px;">Plus ≥2 of the following:</h4>
+                        <div class="checkbox-group" id="mas-criteria">
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="mas-platelets" onchange="calculateMAS()">
+                                <label for="mas-platelets">Platelets ≤181×10³/μL</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="mas-ast" onchange="calculateMAS()">
+                                <label for="mas-ast">AST >48 U/L</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="mas-triglycerides" onchange="calculateMAS()">
+                                <label for="mas-triglycerides">Triglycerides >156 mg/dL</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="mas-fibrinogen" onchange="calculateMAS()">
+                                <label for="mas-fibrinogen">Fibrinogen ≤360 mg/dL</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="score-display">
+                    MAS Additional Criteria: <span id="mas-score">0</span>/4
+                </div>
+                <div id="mas-result" class="result-box negative">
+                    <div id="mas-text">Does not meet MAS classification criteria</div>
+                </div>
+            </div>
+            
+            <div class="alert info">
+                <strong>Note:</strong> Based on Boston Children's data, 59% of diagnosed patients met HLH 2004 criteria while 94% met MAS classification criteria. Clinical judgment remains paramount.
+            </div>
+        </div>
+        
+        <div id="treatment" class="tab-content">
+            <div class="alert info">
+                <strong>Key Principle:</strong> Early recognition and prompt treatment significantly reduce mortality (50% → 6% in Boston Children's study)
+            </div>
+            
+            <div class="treatment-algorithm">
+                <h3 class="section-title">Risk-Stratified Treatment Algorithm</h3>
+                
+                <div class="severity-buttons">
+                    <button class="severity-btn active" onclick="showTreatment('mild')">Mild-Moderate</button>
+                    <button class="severity-btn" onclick="showTreatment('severe')">Severe</button>
+                    <button class="severity-btn" onclick="showTreatment('refractory')">Refractory</button>
+                    <button class="severity-btn" onclick="showTreatment('familial')">Familial HLH</button>
+                </div>
+                
+                <div id="treatment-mild" class="treatment-recommendation">
+                    <h4>🟢 Mild-Moderate HLH/MAS</h4>
+                    <p><strong>Clinical Features:</strong> Stable vitals, not critically ill, low infection risk</p>
+                    
+                    <div class="medication-list">
+                        <div class="medication-item">
+                            <h5>First-Line Options (choose 1-2):</h5>
+                            <ul>
+                                <li><strong>IVIG:</strong> 1-2 g/kg (especially if infection concern)</li>
+                                <li><strong>Anakinra:</strong> 1-2 mg/kg q12h (max 100mg q12h)</li>
+                                <li><strong>Methylprednisolone:</strong> 1-2 mg/kg/day OR</li>
+                                <li><strong>Dexamethasone:</strong> 5-10 mg/m²/day (HLH-2004 protocol dosing)</li>
+                                <li><strong>Cyclosporine:</strong> 2-5 mg/kg q12h</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="alert warning">
+                        <strong>Monitor closely:</strong> Response expected within 48-72 hours. Consider escalation if no improvement.
+                    </div>
+                </div>
+                
+                <div id="treatment-severe" class="treatment-recommendation" style="display: none;">
+                    <h4>🟡 Severe HLH/MAS</h4>
+                    <p><strong>Clinical Features:</strong> ICU-level care, multi-organ dysfunction, hemodynamic instability</p>
+                    
+                    <div class="medication-list">
+                        <div class="medication-item">
+                            <h5>Combination Therapy:</h5>
+                            <ul>
+                                <li><strong>Methylprednisolone:</strong> 2-10 mg/kg/day OR</li>
+                                <li><strong>Dexamethasone:</strong> 5-10 mg/m²/day (HLH-2004 protocol)</li>
+                                <li><strong>PLUS Anakinra:</strong> 2-4 mg/kg q12h</li>
+                                <li><strong>Consider adding IVIG:</strong> 1-2 g/kg</li>
+                                <li><strong>Consider Cyclosporine:</strong> 2-5 mg/kg q12h</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="alert warning">
+                        <strong>Escalation if no response in 24-48 hours:</strong> Consider etoposide, tocilizumab, or other agents
+                    </div>
+                </div>
+                
+                <div id="treatment-refractory" class="treatment-recommendation" style="display: none;">
+                    <h4>🔴 Refractory HLH/MAS</h4>
+                    <p><strong>Definition:</strong> Failed ≥2 treatments + elevated CXCL9 (Boston Children's Table 2 criteria)</p>
+                    
+                    <div class="medication-list">
+                        <div class="medication-item">
+                            <h5>🎯 Emapalumab Protocol (Boston Children's Table 2):</h5>
+                            <ul style="line-height: 1.6;">
+                                <li><strong>Day 1:</strong> 6 mg/kg IV</li>
+                                <li><strong>Day 3:</strong> 3 mg/kg IV</li>
+                                <li><strong>Continue:</strong> 3 mg/kg twice weekly (every 3-4 days)*</li>
+                                <li><strong>Background therapy:</strong> Dexamethasone 5-10 mg/m²/day + Cyclosporine</li>
+                            </ul>
+                            
+                            <div style="background: #fef5e7; padding: 10px; border-radius: 8px; margin: 10px 0; border-left: 3px solid #f39c12;">
+                                <strong>Dose Escalation Protocol:*</strong><br>
+                                If patient does not respond, dose can be increased up to 6 mg/kg on day 3 and then 10 mg/kg on day 9. 
+                                Emapalumab 10 mg/kg every 3 days can be continued until response is achieved. Once the patient has stabilized, decrease the dose to the previous level.
+                            </div>
+                            
+                            <div style="background: #fff3cd; padding: 12px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #856404;">
+                                <strong>Lack of Patient Response Definition:</strong><br>
+                                Provider deems response is not satisfactory AND at least one of the following:
+                                <ul style="margin: 8px 0; padding-left: 20px; font-size: 0.9rem; line-height: 1.5;">
+                                    <li><strong>Fever</strong></li>
+                                    <li><strong>Worsened Splenomegaly</strong></li>
+                                    <li><strong>Platelet Count (/mm³):</strong>
+                                        <br>• If baseline <50,000 → no improvement to >50,000
+                                        <br>• If baseline >50,000 → less than 30% improvement
+                                        <br>• If baseline >100,000 → any decrease to <100,000</li>
+                                    <li><strong>Neutrophil Count (/mm³):</strong>
+                                        <br>• If baseline <500 → no improvement to >500
+                                        <br>• If baseline 500-1,000 → decrease to <500
+                                        <br>• If baseline 1,000-1,500 → decrease to <1,000</li>
+                                    <li><strong>Ferritin (ng/mL):</strong>
+                                        <br>• If baseline ≥3,000 → no decrease by 20%
+                                        <br>• If baseline <3,000 → any increase to >3,000</li>
+                                    <li><strong>Coagulopathy:</strong>
+                                        <br>• If D-dimer abnormal at baseline and no improvement
+                                        <br>• If fibrinogen ≤100 mg/dL and no improvement
+                                        <br>• If fibrinogen >100 mg/dL and any decrease to <100 mg/dL</li>
+                                </ul>
+                            </div>
+                            
+                            <div style="background: #e8f4f8; padding: 10px; border-radius: 8px; margin: 10px 0; border-left: 3px solid #3498db;">
+                                <strong>Required Screening & Prophylaxis:</strong>
+                                <ul style="margin: 5px 0; padding-left: 20px; font-size: 0.9rem;">
+                                    <li><strong>Pre-therapy:</strong> CBC, BUN, Cr, AST, ALT, ferritin, fibrinogen, D-dimer</li>
+                                    <li><strong>Monitor CXCL9:</strong> Prior to therapy, then weekly</li>
+                                    <li><strong>TB screening:</strong> Interferon-gamma release assay</li>
+                                    <li><strong>Viral monitoring:</strong> Adenovirus, EBV, CMV PCRs every 2 weeks</li>
+                                </ul>
+                            </div>
+                            
+                            <div style="background: #f8f9fa; padding: 10px; border-radius: 8px; margin: 10px 0; border-left: 3px solid #6c757d;">
+                                <strong>Required Prophylaxis:</strong>
+                                <ul style="margin: 5px 0; padding-left: 20px; font-size: 0.9rem;">
+                                    <li><strong>Zoster:</strong> Valacyclovir 15-20 mg/kg/dose PO BID (max 500 mg/dose)</li>
+                                    <li><strong>PJP:</strong> Bactrim 5 mg/kg/dose PO MWF (max 160 mg/dose)</li>
+                                    <li><strong>Fungal:</strong> Fluconazole 3-6 mg/kg/dose PO once daily (max 400 mg/dose)</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="medication-item">
+                            <h5>Concurrent Medications (Boston Children's Protocol):</h5>
+                            <ul>
+                                <li><strong>Dexamethasone:</strong> 5-10 mg/m²/day (mandatory background therapy)</li>
+                                <li><strong>Cyclosporine:</strong> Often used concurrently</li>
+                                <li><strong>Avoid:</strong> JAK inhibitors and other biologics (lack of safety evidence with emapalumab)</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="medication-item">
+                            <h5>Alternative Salvage Options:</h5>
+                            <ul>
+                                <li><strong>Etoposide:</strong> 150 mg/m² 2x/week (HLH-2004 protocol)</li>
+                                <li><strong>Tocilizumab:</strong> 8-12 mg/kg (max 800mg) every 2 weeks</li>
+                                <li><strong>Ruxolitinib:</strong> 5-10 mg BID (avoid with emapalumab)</li>
+                                <li><strong>Alemtuzumab:</strong> 1 mg/kg divided over 4 days</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="alert warning">
+                        <strong>Emapalumab Monitoring & Precautions:</strong>
+                        <ul style="margin: 10px 0; padding-left: 20px;">
+                            <li>Monitor for infections (TB, HSV, Pneumocystis, fungi) every 2 weeks</li>
+                            <li>Most common AEs: Infections (56%), hypertension (41%), infusion reactions (27%)<sup>1</sup></li>
+                            <li>Contraindicated in active TB, disseminated histoplasmosis</li>
+                            <li>Ongoing clinical monitoring for herpes zoster, PJP, and fungal infections</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="alert info">
+                        <strong>Boston Children's Experience:</strong> This protocol is based on their Table 2 salvage therapy for patients who failed ≥2 treatments with elevated CXCL9 biomarker.
+                    </div>
+                </div>
+                
+                <div id="treatment-familial" class="treatment-recommendation" style="display: none;">
+                    <h4>⚫ Familial HLH (Primary)</h4>
+                    <p><strong>Definition:</strong> Pathogenic mutations in PRF1, UNC13D, STX11, STXBP2, or other genes</p>
+                    
+                    <div class="medication-list">
+                        <div class="medication-item">
+                            <h5>Standard Protocol:</h5>
+                            <ul>
+                                <li><strong>HLH-2004 Protocol:</strong> Dexamethasone 10 mg/m²/day × 2 weeks, then taper + Etoposide 150 mg/m² 2×/week</li>
+                                <li><strong>Bridge to transplant:</strong> Bone marrow transplant is curative</li>
+                                <li><strong>Oncology consultation:</strong> Required for management</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="alert info">
+                        <strong>Note:</strong> 25% of patients in post-EBG cohort had genetic causes. Systematic genetic testing recommended.
+                    </div>
+                </div>
+                
+                <div class="diagnostic-section">
+                    <h3 class="section-title">⚠️ Definition of Refractory HLH/MAS</h3>
+                    <div class="criteria-grid">
+                        <div class="criteria-item">
+                            <h4>Refractory Disease Definition:</h4>
+                            <ul style="padding-left: 20px;">
+                                <li><strong>Failed ≥2 treatments</strong> in Table 1 (Boston Children's criteria)</li>
+                                <li><strong>CXCL9 elevated</strong> (biomarker of treatment failure)</li>
+                                <li><strong>Inadequate response</strong> to first-line therapy after 72 hours</li>
+                                <li><strong>Progressive disease</strong> despite appropriate treatment</li>
+                                <li><strong>Recurrent disease</strong> after initial response</li>
+                                <li><strong>Intolerance</strong> to conventional HLH therapy</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="criteria-item">
+                            <h4>Clinical Indicators of Treatment Failure:</h4>
+                            <ul style="padding-left: 20px;">
+                                <li>Persistent or recurring fever</li>
+                                <li>Worsening or static cytopenias</li>
+                                <li>Rising or persistently elevated ferritin</li>
+                                <li>No improvement in inflammatory markers (CRP, ESR)</li>
+                                <li>Progressive organ dysfunction</li>
+                                <li>Need for escalating supportive care</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="alert warning">
+                        <strong>Action:</strong> If criteria for refractory disease are met, immediately consider salvage therapies including emapalumab per Boston Children's Table 2 protocol.
+                    </div>
+                </div>
+            </div>
+            
+            <div class="alert warning">
+                <strong>Important Considerations:</strong>
+                <ul style="margin: 10px 0; padding-left: 20px;">
+                    <li>Malignancy-associated HLH has poor prognosis (100% mortality in some series)</li>
+                    <li>Consider oncologic evaluation in new-onset HLH/MAS (~12% have malignancy)</li>
+                    <li>Genetic testing recommended in most patients (25% yield in Boston Children's series)</li>
+                    <li>IVIG particularly useful when infection concern limits immunosuppression</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div id="monitoring" class="tab-content">
+            <div class="alert info">
+                <strong>Quality Metrics:</strong> Based on Boston Children's pre-specified quality improvement measures
+            </div>
+            
+            <div class="monitoring-grid">
+                <div class="monitoring-card">
+                    <h4>🎯 Recognition & Treatment Metrics</h4>
+                    <ul style="padding-left: 20px; margin: 15px 0;">
+                        <li><strong>Target:</strong> Time to HLH/MAS diagnosis <2 days</li>
+                        <li><strong>Target:</strong> Time to treatment initiation <2 days</li>
+                        <li><strong>Improvement:</strong> 4→2 days (diagnosis), 5→2 days (treatment)</li>
+                    </ul>
+                </div>
+                
+                <div class="monitoring-card">
+                    <h4>📊 Laboratory Response Markers</h4>
+                    <ul style="padding-left: 20px; margin: 15px 0;">
+                        <li><strong>CRP reduction ≥50%:</strong> Significant improvement post-EBG (p<0.01)</li>
+                        <li><strong>Ferritin reduction ≥50%:</strong> Trend toward faster normalization</li>
+                        <li><strong>Platelet recovery:</strong> 50% → 65% during admission</li>
+                        <li><strong>LFT normalization:</strong> 20% → 29% during admission</li>
+                    </ul>
+                </div>
+                
+                <div class="monitoring-card">
+                    <h4>🏥 Clinical Outcome Metrics</h4>
+                    <ul style="padding-left: 20px; margin: 15px 0;">
+                        <li><strong>Mortality:</strong> 50% → 6% (RR 8.5, 95% CI 1.6-50.9)</li>
+                        <li><strong>Length of stay:</strong> 28 → 11 days median</li>
+                        <li><strong>Complete response to 1st line:</strong> 25% → 67%</li>
+                        <li><strong>ICU admission:</strong> Monitor need for escalation</li>
+                    </ul>
+                </div>
+                
+                <div class="monitoring-card">
+                    <h4>⚠️ Red Flags for Escalation</h4>
+                    <ul style="padding-left: 20px; margin: 15px 0;">
+                        <li>No improvement in fever/clinical status after 48-72 hours</li>
+                        <li>Worsening cytopenias or organ dysfunction</li>
+                        <li>Rising ferritin or inflammatory markers</li>
+                        <li>Hemodynamic instability requiring ICU support</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="diagnostic-section">
+                <h3 class="section-title">Monitoring Laboratory Panel</h3>
+                <div class="criteria-grid">
+                    <div class="criteria-item">
+                        <h4>Daily Labs (Acute Phase)</h4>
+                        <ul style="padding-left: 20px;">
+                            <li>CBC with differential</li>
+                            <li>Comprehensive metabolic panel</li>
+                            <li>Liver function tests (AST, ALT, bilirubin)</li>
+                            <li>Coagulation studies (PT/INR, fibrinogen)</li>
+                            <li>Ferritin</li>
+                            <li>CRP</li>
+                            <li>Triglycerides</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="criteria-item">
+                        <h4>Specialized Studies</h4>
+                        <ul style="padding-left: 20px;">
+                            <li>Soluble IL-2 receptor (sCD25)</li>
+                            <li>NK cell function assay</li>
+                            <li>Bone marrow biopsy (if indicated)</li>
+                            <li>Genetic testing panel (HLH genes)</li>
+                            <li>Flow cytometry (perforin, CD107a)</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="criteria-item">
+                        <h4>Infectious Workup</h4>
+                        <ul style="padding-left: 20px;">
+                            <li>Blood, urine, respiratory cultures</li>
+                            <li>Viral PCR panel (EBV, CMV, etc.)</li>
+                            <li>Fungal studies if indicated</li>
+                            <li>TB screening</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="treatment-algorithm">
+                <h3 class="section-title">Response Assessment Timeline</h3>
+                <div class="medication-list">
+                    <div class="medication-item">
+                        <h5>24-48 Hours</h5>
+                        <ul>
+                            <li>Fever improvement expected</li>
+                            <li>Stabilization of vital signs</li>
+                            <li>Halt in clinical deterioration</li>
+                        </ul>
+                    </div>
+                    <div class="medication-item">
+                        <h5>48-72 Hours</h5>
+                        <ul>
+                            <li>CRP reduction ≥50%</li>
+                            <li>Ferritin plateau or decline</li>
+                            <li>Platelet count stabilization</li>
+                        </ul>
+                    </div>
+                    <div class="medication-item">
+                        <h5>1 Week</h5>
+                        <ul>
+                            <li>Sustained fever resolution</li>
+                            <li>Improvement in cytopenias</li>
+                            <li>Normalization of LFTs</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="references" class="tab-content">
+            <div class="diagnostic-section">
+                <h3 class="section-title">Evidence Base & Key Resources</h3>
+                
+                <div class="criteria-grid">
+                    <div class="criteria-item">
+                        <h4>📚 Primary References</h4>
+                        <ul style="padding-left: 20px; line-height: 1.6;">
+                            <li>Henderson LA, et al. An Evidence-Based Guideline Improves Outcomes for Patients with Hemophagocytic Lymphohistiocytosis and Macrophage Activation Syndrome. <em>Pediatr Rheumatol Online J</em>. 2022.</li>
+                            <li>Henter JI, et al. HLH-2004: Diagnostic and therapeutic guidelines for hemophagocytic lymphohistiocytosis. <em>Pediatr Blood Cancer</em>. 2007;48:124-31.</li>
+                            <li>Ravelli A, et al. 2016 Classification Criteria for Macrophage Activation Syndrome Complicating Systemic Juvenile Idiopathic Arthritis. <em>Arthritis Rheumatol</em>. 2016;68:566-76.</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="criteria-item">
+                        <h4>💊 Treatment Evidence</h4>
+                        <ul style="padding-left: 20px; line-height: 1.6;">
+                            <li>Eloseily EM, et al. Benefit of Anakinra in Treating Pediatric Secondary Hemophagocytic Lymphohistiocytosis. <em>Arthritis Rheumatol</em>. 2020;72:326-34.</li>
+                            <li>Kumar B, et al. A Personalized Diagnostic and Treatment Approach for Macrophage Activation Syndrome and Secondary Hemophagocytic Lymphohistiocytosis in Adults. <em>J Clin Immunol</em>. 2017;37:638-43.</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="criteria-item">
+                        <h4>🔬 Genetic & Pathophysiology</h4>
+                        <ul style="padding-left: 20px; line-height: 1.6;">
+                            <li>Jordan MB, et al. Challenges in the diagnosis of hemophagocytic lymphohistiocytosis. <em>Pediatr Blood Cancer</em>. 2019;66:e27929.</li>
+                            <li>Canna SW, Cron RQ. Highways to hell: Mechanism-based management of cytokine storm syndromes. <em>J Allergy Clin Immunol</em>. 2020;146:949-59.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="diagnostic-section">
+                <h3 class="section-title">Clinical Decision Support</h3>
+                
+                <div class="alert info">
+                    <strong>Boston Children's EBG Key Components:</strong>
+                    <ul style="margin: 10px 0; padding-left: 20px;">
+                        <li><strong>Entry Criteria:</strong> Fever ≥38.2°C + Ferritin ≥500 ng/mL</li>
+                        <li><strong>Coordinating Service:</strong> Rheumatology as "gatekeeper"</li>
+                        <li><strong>Multidisciplinary Approach:</strong> Rheumatology, oncology, critical care</li>
+                        <li><strong>Risk-Stratified Treatment:</strong> Based on severity and infection risk</li>
+                        <li><strong>Quality Metrics:</strong> Pre-specified outcome measures</li>
+                    </ul>
+                </div>
+                
+                <div class="criteria-grid">
+                    <div class="criteria-item">
+                        <h4>🏥 Implementation Tips</h4>
+                        <ul style="padding-left: 20px;">
+                            <li>Educational campaigns for house staff</li>
+                            <li>Electronic order sets</li>
+                            <li>Clinical conferences and case reviews</li>
+                            <li>Standardized consultation pathways</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="criteria-item">
+                        <h4>⚖️ Balancing Measures</h4>
+                        <ul style="padding-left: 20px;">
+                            <li>Increased consultation volume (acceptable trade-off)</li>
+                            <li>Resource utilization monitoring</li>
+                            <li>Adverse events from early treatment</li>
+                            <li>False positive rates</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="criteria-item">
+                        <h4>📞 When to Consult</h4>
+                        <ul style="padding-left: 20px;">
+                            <li><strong>Rheumatology:</strong> All suspected HLH/MAS cases</li>
+                            <li><strong>Oncology:</strong> Familial HLH, refractory cases</li>
+                            <li><strong>Critical Care:</strong> Severe disease, organ support</li>
+                            <li><strong>Genetics:</strong> Consider in all cases</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="reference-list">
+                <h4>Complete Reference List</h4>
+                <ol>
+                    <li>Taylor ML, Hoyt KJ, Han J, et al. An Evidence-Based Guideline Improves Outcomes for Patients with Hemophagocytic Lymphohistiocytosis and Macrophage Activation Syndrome. Pediatr Rheumatol Online J. 2022;20:47.</li>
+                    <li>Halyabar O, Chang MH, Schoettler ML, et al. Calm in the midst of cytokine storm: a collaborative approach to the diagnosis and treatment of hemophagocytic lymphohistiocytosis and macrophage activation syndrome. Pediatr Rheumatol Online J. 2019;17:7.</li>
+                    <li>Henter JI, Horne A, Aricó M, et al. HLH-2004: Diagnostic and therapeutic guidelines for hemophagocytic lymphohistiocytosis. Pediatr Blood Cancer. 2007;48:124-31.</li>
+                    <li>Ravelli A, Minoia F, Davì S, et al. 2016 Classification Criteria for Macrophage Activation Syndrome Complicating Systemic Juvenile Idiopathic Arthritis. Arthritis Rheumatol. 2016;68:566-76.</li>
+                    <li>Eloseily EM, Weiser P, Crayne CB, et al. Benefit of Anakinra in Treating Pediatric Secondary Hemophagocytic Lymphohistiocytosis. Arthritis Rheumatol. 2020;72:326-34.</li>
+                </ol>
+            </div>
+            
+            <div class="alert info">
+                <strong>Disclaimer:</strong> This tool is for educational purposes and clinical decision support. Always use clinical judgment and institutional protocols. Consult subspecialists for complex cases.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Tab functionality
+        function showTab(tabName) {
+            // Hide all tabs
+            const tabs = document.querySelectorAll('.tab-content');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            
+            // Remove active class from nav buttons
+            const navTabs = document.querySelectorAll('.nav-tab');
+            navTabs.forEach(tab => tab.classList.remove('active'));
+            
+            // Show selected tab
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // Screening calculator
+        function updateScreening() {
+            const checkboxes = document.querySelectorAll('#screening input[type="checkbox"]');
+            const checkedCount = Array.from(checkboxes).filter(cb => cb.checked).length;
+            const resultDiv = document.getElementById('screening-result');
+            const textDiv = document.getElementById('screening-text');
+            
+            if (checkedCount >= 3) {
+                resultDiv.className = 'result-box positive';
+                resultDiv.style.display = 'block';
+                textDiv.textContent = `High suspicion for HLH/MAS (${checkedCount} features present). Consult Rheumatology for evaluation.`;
+            } else if (checkedCount >= 1) {
+                resultDiv.className = 'result-box result-box-warning';
+                resultDiv.style.background = 'linear-gradient(135deg, #f39c12, #e67e22)';
+                resultDiv.style.display = 'block';
+                textDiv.textContent = `Moderate concern for HLH/MAS (${checkedCount} features). Consider further evaluation.`;
+            } else {
+                resultDiv.style.display = 'none';
+            }
+        }
+
+        // HLH 2004 calculator
+        function calculateHLH() {
+            const checkboxes = document.querySelectorAll('#diagnosis input[type="checkbox"][id^="hlh-"]');
+            const checkedCount = Array.from(checkboxes).filter(cb => cb.checked).length;
+            
+            document.getElementById('hlh-score').textContent = checkedCount;
+            
+            const resultDiv = document.getElementById('hlh-result');
+            const textDiv = document.getElementById('hlh-text');
+            
+            if (checkedCount >= 5) {
+                resultDiv.className = 'result-box positive';
+                textDiv.textContent = 'Meets HLH 2004 diagnostic criteria';
+            } else {
+                resultDiv.className = 'result-box negative';
+                textDiv.textContent = `Does not meet HLH 2004 criteria (${checkedCount}/8)`;
+            }
+        }
+
+        // MAS calculator
+        function calculateMAS() {
+            const ferritinChecked = document.getElementById('mas-ferritin').checked;
+            const additionalCriteria = document.querySelectorAll('#mas-criteria input[type="checkbox"]');
+            const additionalCount = Array.from(additionalCriteria).filter(cb => cb.checked).length;
+            
+            document.getElementById('mas-score').textContent = additionalCount;
+            
+            const resultDiv = document.getElementById('mas-result');
+            const textDiv = document.getElementById('mas-text');
+            
+            if (ferritinChecked && additionalCount >= 2) {
+                resultDiv.className = 'result-box positive';
+                textDiv.textContent = 'Meets 2016 MAS classification criteria';
+            } else if (ferritinChecked) {
+                resultDiv.className = 'result-box result-box-warning';
+                resultDiv.style.background = 'linear-gradient(135deg, #f39c12, #e67e22)';
+                textDiv.textContent = `Ferritin criteria met, but needs ≥2 additional criteria (${additionalCount}/4)`;
+            } else {
+                resultDiv.className = 'result-box negative';
+                textDiv.textContent = 'Does not meet MAS classification criteria';
+            }
+        }
+
+        // Treatment algorithm
+        function showTreatment(severity) {
+            // Hide all treatment sections
+            const treatments = document.querySelectorAll('[id^="treatment-"]');
+            treatments.forEach(t => t.style.display = 'none');
+            
+            // Remove active from buttons
+            const buttons = document.querySelectorAll('.severity-btn');
+            buttons.forEach(b => b.classList.remove('active'));
+            
+            // Show selected treatment
+            document.getElementById('treatment-' + severity).style.display = 'block';
+            event.target.classList.add('active');
+        }
+    </script>
+</body>
+</html>
